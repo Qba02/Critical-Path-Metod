@@ -1,0 +1,17 @@
+.table-div{
+    display: flex;
+    align-content: center;
+    width: 75vw;
+    margin: 16px;
+}
+
+.table-box{
+    color: #61dafb;
+}
+
+.column{
+    color: whitesmoke;
+}
+.data-grid{
+    color: whitesmoke;
+}
