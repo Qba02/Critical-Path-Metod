@@ -1,17 +1,50 @@
-.table-div{
+.table-box{
+    color: #61dafb;
     display: flex;
-    align-content: center;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     width: 75vw;
     margin: 16px;
 }
-
-.table-box{
-    color: #61dafb;
-}
-
-.column{
+.header, .column, .grid-toolbar, .data-grid{
     color: whitesmoke;
 }
-.data-grid{
+
+.header button{
     color: whitesmoke;
+}
+.alert-div{
+    width:400px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 500;
+    text-align: start;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow: hidden;
+    background-color: #fff;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    padding: 24px;
+    color: #333;
+}
+
+.alert-div p {
+    margin: 0;
+    line-height: 1.5rem;
+    font-weight: 400;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.modal{
+    position: fixed;
+    z-index: 1300;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

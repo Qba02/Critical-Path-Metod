@@ -6,7 +6,9 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import CancelIcon from '@mui/icons-material/Close';
+import { Modal } from '@mui/base/Modal';
 import {
     GridRowModes,
     DataGrid,
@@ -15,25 +17,21 @@ import {
     GridRowEditStopReasons,
 } from '@mui/x-data-grid';
 import {
-    randomCreatedDate,
-    randomTraderName,
     randomId,
-    randomArrayItem,
 } from '@mui/x-data-grid-generator';
+import PropTypes from 'prop-types';
+import clsx from "clsx";
+import {styled} from "@mui/material";
 
-const roles = ['Market', 'Finance', 'Development'];
-const randomRole = () => {
-    return randomArrayItem(roles);
-};
 
-const initialRows = [{id: '', name: '', age: '', role: ''}]
+const initialRows = [{id: 'first', activity: '', prevActivity: '', time:0}]
 
 function EditToolbar(props) {
     const { setRows, setRowModesModel } = props;
 
     const handleClick = () => {
         const id = randomId();
-        setRows((oldRows) => [...oldRows, { id, name: '', age: '', isNew: true }]);
+        setRows((oldRows) => [...oldRows, { id, activity: '', prevActivity: '', time:0, isNew: true }]);
         setRowModesModel((oldModel) => ({
             ...oldModel,
             [id]: { mode: GridRowModes.Edit, fieldToFocus: 'name' },
@@ -41,9 +39,9 @@ function EditToolbar(props) {
     };
 
     return (
-        <GridToolbarContainer>
+        <GridToolbarContainer className={"grid-toolbar"}>
             <Button color="secondary" startIcon={<AddIcon />} onClick={handleClick}>
-                Add record
+                Dodaj rekord
             </Button>
         </GridToolbarContainer>
     );
@@ -52,6 +50,35 @@ function EditToolbar(props) {
 export default function EditableTable() {
     const [rows, setRows] = React.useState(initialRows);
     const [rowModesModel, setRowModesModel] = React.useState({});
+
+    //modal
+    const [open, setOpen] = React.useState(false);
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
+
+    const Backdrop = React.forwardRef((props, ref) => {
+        const { open, className, ...other } = props;
+        return (
+            <div
+                className={clsx({ 'base-Backdrop-open': open }, className)}
+                ref={ref}
+                {...other}
+            />
+        );
+    });
+
+    Backdrop.propTypes = {
+        className: PropTypes.string.isRequired,
+        open: PropTypes.bool,
+    };
+
+    const StyledBackdrop = styled(Backdrop)`
+      z-index: -1;
+      position: fixed;
+      inset: 0;
+      background-color: rgb(0 0 0 / 0.5);
+      -webkit-tap-highlight-color: transparent;
+`;
 
     const handleRowEditStop = (params, event) => {
         if (params.reason === GridRowEditStopReasons.rowFocusOut) {
@@ -64,7 +91,7 @@ export default function EditableTable() {
     };
 
     const handleSaveClick = (id) => () => {
-        setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
+            setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
     };
 
     const handleDeleteClick = (id) => () => {
@@ -93,20 +120,33 @@ export default function EditableTable() {
         setRowModesModel(newRowModesModel);
     };
 
+    //Z TEJ FUNKCJI TRZEBA POBRAC DANE DO GRAFU
+    const getGraphData = () => {
+        for (let key in rows){
+            if (rows[key].time === null || rows[key].activity === "" || rows[key].prevActivity === ""){
+                handleOpen();
+                return;
+            }else
+                console.log(rows);  // TUTAJ
+        }
+    };
+
     const columns = [
         {
             field: 'activity',
             headerName: 'Czynność',
             width: 180,
             editable: true,
-            cellClassName: 'column'
+            cellClassName: 'column',
+            headerClassName: 'header'
         },
         {
             field: 'prevActivity',
             headerName: 'Czynność poprzedzająca',
             width: 240,
             editable: true,
-            cellClassName: 'column'
+            cellClassName: 'column',
+            headerClassName: 'header'
         },
         {
             field: 'time',
@@ -116,7 +156,8 @@ export default function EditableTable() {
             align: 'left',
             headerAlign: 'left',
             editable: true,
-            cellClassName: 'column'
+            cellClassName: 'column',
+            headerClassName: 'header'
         },
         {
             field: 'actions',
@@ -124,6 +165,7 @@ export default function EditableTable() {
             headerName: 'Edytuj/Usuń',
             width: 100,
             cellClassName: 'actions',
+            headerClassName: 'header',
             getActions: ({ id }) => {
                 const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
 
@@ -167,7 +209,7 @@ export default function EditableTable() {
     ];
 
     return (
-        <div className={"table-div"}>
+        <>
             <Box className={"table-box"}
                 sx={{
                     height: 500,
@@ -180,10 +222,13 @@ export default function EditableTable() {
                     },
                 }}
             >
+
                 <DataGrid
                     rows={rows}
+                    style={{ width:"60%"}}
                     columns={columns}
                     editMode="row"
+                    hideFooter={true}
                     rowModesModel={rowModesModel}
                     onRowModesModelChange={handleRowModesModelChange}
                     onRowEditStop={handleRowEditStop}
@@ -195,7 +240,33 @@ export default function EditableTable() {
                         toolbar: { setRows, setRowModesModel },
                     }}
                 />
+
+                <Button onClick={getGraphData}  color="secondary" variant="outlined" style={{ margin: '10px' }}>
+                    Wygeneruj graf
+                </Button>
+                <Modal
+                    className={"modal"}
+                    aria-labelledby="unstyled-modal-title"
+                    aria-describedby="unstyled-modal-description"
+                    open={open}
+                    onClose={handleClose}
+                    slots={{ backdrop: StyledBackdrop }}
+                >
+                    <div className={"alert-div"}>
+
+                        <h2 id="unstyled-modal-title" className="modal-title" >
+                            Błąd&nbsp;
+                            <ErrorOutlineIcon style={{color:"red"}}/>
+
+                        </h2>
+                        <p id="unstyled-modal-description" className="modal-description">
+                            Wypełnij wszystkie pola tabeli!
+                        </p>
+                    </div>
+            </Modal>
             </Box>
-        </div>
+        </>
     );
+
+
 }
