@@ -55,8 +55,7 @@ const calculateCPM = (activities) => {
             activity.EF = activity.time;
         } else {
             const prevActivities = activity.prevActivity.split(','); // Rozdziel poprzednie czynnosci
-            const maxPrevEF = Math.max(...prevActivities.map(prev => activities.find(a => a.activity === prev).EF)); // Maksimum z EF poprzednich czynnsści
-            activity.ES = maxPrevEF;
+            activity.ES  = Math.max(...prevActivities.map(prev => activities.find(a => a.activity === prev).EF)); // Maksimum z EF poprzednich czynnsści
             activity.EF = activity.ES + activity.time;
         }
     });
@@ -105,7 +104,6 @@ const calculateCPM = (activities) => {
     activities.slice().reverse().forEach(activity => {
         if (successorsMap.has(activity.activity)) {
             const successorsLS = successorsMap.get(activity.activity).map(s => Number(activities.find(a => a.activity === s).LS));
-            console.log(successorsLS);
             activity.LF = Math.min(...successorsLS);
         }
 
@@ -119,8 +117,81 @@ const calculateCPM = (activities) => {
     return activities;
 };
 
+const findCriticalPath = (cpmActivitiesTable) => {
+    let paths = [];
+    let criticalPaths = [];
+
+    // Sortujemy tablice w kolejnosci od konca do poczatku
+    cpmActivitiesTable.sort((a, b) => b.LF - a.LF);
+
+    // Znajdujemy maksymalne LF
+    let maxLF = cpmActivitiesTable[0].LF;
+
+    // Inicjalizujemy sciezki startowe
+    cpmActivitiesTable.forEach(activity => {
+        if (activity.slack === 0 && activity.LF === maxLF) {
+            paths.push([activity]);
+        }
+    });
+
+    // Przechodzimy przez wszystkie sciezki
+    while (paths.length > 0) {
+        let path = paths.pop();
+        let lastActivityInPath = path[path.length - 1];
+        let predecessors = lastActivityInPath.prevActivity.split(',');
+
+        // Sprawdzamy poprzednikow
+        let predecessorActivities = predecessors.map(predecessor => cpmActivitiesTable.find(a => a.activity === predecessor)).filter(a => a && a.slack === 0);
+
+        if (predecessorActivities.length === 0) {
+            // Jesli nie ma poprzedniksw, dodajemy sciezke do sciezek krytycznych
+            criticalPaths.push(path);
+        } else if (predecessorActivities.length === 1) {
+            // Jesli jest tylko jeden poprzednik, kontynuujemy ta sciezke
+            // dodajemy aktywnosc na sciezce i cala sczeżke do paths
+            path.push(predecessorActivities[0]);
+            paths.push(path);
+        } else {
+            // Jesli jest wiecej niz jeden poprzednik, tworzymy nowe sciezki
+            predecessorActivities.forEach(predecessorActivity => {
+                let newPath = [...path, predecessorActivity];
+                paths.push(newPath);
+            });
+        }
+    }
+
+    // Obliczamy czas dla kazdej sciezki krytycznej
+    let maxTime = 0;
+    let criticalPath;
+
+    criticalPaths.forEach(path => {
+        let pathTime = path.reduce((sum, activity) => sum + activity.time, 0);
+        if (pathTime > maxTime) {
+            maxTime = pathTime;
+            criticalPath = path;
+        }
+    });
+
+    // Odwracamy sciezke krytyczna, aby była w odpowiedniej kolejnosci
+    criticalPath.reverse();
+
+    return {
+        criticalPath,
+        maxTime
+    };
+};
+
+
+
+
 const cpmActivities = calculateCPM(rows);
+
 cpmActivities.forEach(activity => {
-    console.log(`Activity: ${activity.activity}, [ES,EF] = [${activity.ES},${activity.EF}], [LS,LF] = [${activity.LS},${activity.LF}], slack: ${activity.slack}`);
+    console.log(`Activity: ${activity.activity}, time: ${activity.time}, [ES,EF] = [${activity.ES},${activity.EF}], [LS,LF] = [${activity.LS},${activity.LF}], slack: ${activity.slack}`);
 })
+
+let result = findCriticalPath(cpmActivities);
+let criticalPathStr = result.criticalPath.map(activity => activity.activity).join(' -> ');
+
+console.log(`Critical path: ${criticalPathStr}, critical time = ${result.maxTime}`);
 
