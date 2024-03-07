@@ -49,7 +49,7 @@ const rows = [
 
 const calculateCPM = (activities) => {
 
-    activities.forEach((activity, index) => {
+    activities.forEach((activity) => {
         if (activity.prevActivity === '') {
             activity.ES = 0;
             activity.EF = activity.time;
