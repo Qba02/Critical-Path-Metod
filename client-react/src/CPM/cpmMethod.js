@@ -132,6 +132,31 @@ const calculateCPM = (activities) => {
         });
     });
 
+    let dummyActivityCounter = 1;
+
+// Szukamy czynnosci pozornych w tabeli nastepnikow
+    activities.forEach(activity => {
+        if (successorsMap.has(activity.activity)) {
+            const successors = successorsMap.get(activity.activity);
+            if (successors.length >= 2) {
+                for (let i = 0; i < successors.length; i++) {
+                    for (let j = i + 1; j < successors.length; j++) {
+                        const successor1 = successors[i];
+                        const successor2 = successors[j];
+                        const nextSuccessors1 = successorsMap.get(successor1) || [];
+                        const nextSuccessors2 = successorsMap.get(successor2) || [];
+                        const commonSuccessor = nextSuccessors1.find(s => nextSuccessors2.includes(s));
+                        if (commonSuccessor) {
+                            const dummyActivity = `P${dummyActivityCounter++}`;
+                            successorsMap.get(activity.activity).push(dummyActivity);
+                            successorsMap.set(dummyActivity, [successor1, successor2]);
+                        }
+                    }
+                }
+            }
+        }
+    });
+
 //wypisz sukcesorow
     console.log("Mapa successorsMap:");
     successorsMap.forEach((successors, activity) => {
