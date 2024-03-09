@@ -3,6 +3,65 @@
 //todo: validate incoming data
 
 
+//Should return Tmax = 49 and critical path: P1-B-C-E-F-P2-H-J-K
+const rowsWithApparentActivities = [
+    {
+        activity: 'A',
+        prevActivity: '',
+        time: 7,
+    },
+    {
+        activity: 'B',
+        prevActivity: '',
+        time: 10,
+    },
+    {
+        activity: 'C',
+        prevActivity: 'A,B',
+        time: 5,
+    },
+    {
+        activity: 'D',
+        prevActivity: 'C',
+        time: 11,
+    },
+    {
+        activity: 'E',
+        prevActivity: 'C',
+        time: 12,
+    },
+    {
+        activity: 'F',
+        prevActivity: 'E',
+        time: 7,
+    },
+    {
+        activity: 'G',
+        prevActivity: 'C',
+        time: 7,
+    },
+    {
+        activity: 'H',
+        prevActivity: 'D,F,G',
+        time: 5,
+    },
+    {
+        activity: 'I',
+        prevActivity: 'D,F',
+        time: 6,
+    },
+    {
+        activity: 'J',
+        prevActivity: 'H',
+        time: 5,
+    },
+    {
+        activity: 'K',
+        prevActivity: 'I,J',
+        time: 5,
+    }
+]
+
 const rows = [
     {
         activity: 'A',
