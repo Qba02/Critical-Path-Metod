@@ -3,8 +3,46 @@
 //todo: validate incoming data
 
 
+//first test
+//Tmax = 15
+//A-D-E (but there is P1 in the successor/ predecessor table)
+const rowsWithApparentActivities_1 = [
+    {
+        activity: 'A',
+        prevActivity: '',
+        time: 5,
+    },
+    {
+        activity: 'B',
+        prevActivity: 'A',
+        time: 3,
+    },
+    {
+        activity: 'C',
+        prevActivity: '',
+        time: 4,
+    },
+    {
+        activity: 'D',
+        prevActivity: 'A',
+        time: 6,
+    },
+    {
+        activity: 'E',
+        prevActivity: 'D',
+        time: 4,
+    },
+    {
+        activity: 'F',
+        prevActivity: 'B,C,D',
+        time: 3,
+    },
+
+];
+
 //Should return Tmax = 49 and critical path: P1-B-C-E-F-P2-H-J-K
-const rowsWithApparentActivities = [
+//second test
+const rowsWithApparentActivities_2 = [
     {
         activity: 'A',
         prevActivity: '',
@@ -108,6 +146,48 @@ const rows = [
 
 const calculateCPM = (activities) => {
 
+    //dodajemy czynnosci pozorne jesli wystepuja
+    let dummyActivityCounter = 1;
+
+    rows.forEach(row => {
+        const predecessors = row.prevActivity.split(',').map(a => a.trim());
+        if (predecessors.length >= 2) {
+            for (let i = 0; i < predecessors.length; i++) {
+                for (let j = i + 1; j < predecessors.length; j++) {
+                    const predecessor1 = predecessors[i];
+                    const predecessor2 = predecessors[j];
+
+                    let commonPredecessors = [];
+                    if (rows.filter(r => r.activity === predecessor1 && r.prevActivity === '').length > 0 && rows.filter(r => r.activity === predecessor2 && r.prevActivity === '').length > 0) {
+                        commonPredecessors.push('NO_PREDECESSORS');
+                    } else {
+                        commonPredecessors = rows.filter(r => r.activity === predecessor1 || r.activity === predecessor2)
+                            .map(r => r.prevActivity.split(',').map(a => a.trim()))
+                            .reduce((a, b) => a.filter(c => b.includes(c)));
+                    }
+
+                    if(commonPredecessors[0] === 'NO_PREDECESSORS'){
+                        const dummyActivity = `P${dummyActivityCounter++}`;
+                        const minPredecessor = predecessor1 < predecessor2 ? predecessor1 : predecessor2;
+                        rows.find(r => r.activity === minPredecessor).prevActivity = dummyActivity;
+                        rows.push({ activity: dummyActivity, prevActivity: '', time: 0 });
+                    }
+                    else if (commonPredecessors.length > 0) {
+                        //bledna logika
+                        const dummyActivity = `P${dummyActivityCounter++}`;
+                        const maxPredecessor = predecessor1 > predecessor2 ? predecessor1 : predecessor2;
+                        row.prevActivity = row.prevActivity.split(',').map(a => a.trim() === maxPredecessor ? dummyActivity : a).join(',');
+                        rows.push({ activity: dummyActivity, prevActivity: commonPredecessors.join(','), time: 0 });
+                    }
+                }
+            }
+        }
+    });
+
+
+
+
+
     activities.forEach((activity) => {
         if (activity.prevActivity === '') {
             activity.ES = 0;
@@ -132,30 +212,6 @@ const calculateCPM = (activities) => {
         });
     });
 
-    let dummyActivityCounter = 1;
-
-// Szukamy czynnosci pozornych w tabeli nastepnikow
-    activities.forEach(activity => {
-        if (successorsMap.has(activity.activity)) {
-            const successors = successorsMap.get(activity.activity);
-            if (successors.length >= 2) {
-                for (let i = 0; i < successors.length; i++) {
-                    for (let j = i + 1; j < successors.length; j++) {
-                        const successor1 = successors[i];
-                        const successor2 = successors[j];
-                        const nextSuccessors1 = successorsMap.get(successor1) || [];
-                        const nextSuccessors2 = successorsMap.get(successor2) || [];
-                        const commonSuccessor = nextSuccessors1.find(s => nextSuccessors2.includes(s));
-                        if (commonSuccessor) {
-                            const dummyActivity = `P${dummyActivityCounter++}`;
-                            successorsMap.get(activity.activity).push(dummyActivity);
-                            successorsMap.set(dummyActivity, [successor1, successor2]);
-                        }
-                    }
-                }
-            }
-        }
-    });
 
 //wypisz sukcesorow
     console.log("Mapa successorsMap:");
