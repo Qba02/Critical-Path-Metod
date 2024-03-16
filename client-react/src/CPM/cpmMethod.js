@@ -98,9 +98,9 @@ const rowsWithApparentActivities_2 = [
         prevActivity: 'I,J',
         time: 5,
     }
-]
+];
 
-const rows = [
+const rows2 = [
     {
         activity: 'A',
         prevActivity: '',
@@ -144,9 +144,11 @@ const rows = [
 ];
 
 
-const calculateCPM = (activities) => {
+export const calculateCPM = (activitiesProp) => {
 
     //dodajemy czynnosci pozorne jesli wystepuja
+    const rows = [...activitiesProp];
+    const activities = [...activitiesProp];
     let dummyActivityCounter = 1;
 
     rows.forEach(row => {
@@ -257,7 +259,7 @@ const calculateCPM = (activities) => {
     return activities;
 };
 
-const findCriticalPath = (cpmActivitiesTable) => {
+export const findCriticalPath = (cpmActivitiesTable) => {
     let paths = [];
     let criticalPaths = [];
 
@@ -322,16 +324,16 @@ const findCriticalPath = (cpmActivitiesTable) => {
 };
 
 
-
-
-const cpmActivities = calculateCPM(rows);
-
-cpmActivities.forEach(activity => {
-    console.log(`Activity: ${activity.activity}, time: ${activity.time}, [ES,EF] = [${activity.ES},${activity.EF}], [LS,LF] = [${activity.LS},${activity.LF}], slack: ${activity.slack}`);
-})
-
-let result = findCriticalPath(cpmActivities);
-let criticalPathStr = result.criticalPath.map(activity => activity.activity).join(' -> ');
-
-console.log(`Critical path: ${criticalPathStr}, critical time = ${result.maxTime}`);
+//
+//
+// const cpmActivities = calculateCPM(rows);
+//
+// cpmActivities.forEach(activity => {
+//     console.log(`Activity: ${activity.activity}, time: ${activity.time}, [ES,EF] = [${activity.ES},${activity.EF}], [LS,LF] = [${activity.LS},${activity.LF}], slack: ${activity.slack}`);
+// })
+//
+// let result = findCriticalPath(cpmActivities);
+// let criticalPathStr = result.criticalPath.map(activity => activity.activity).join(' -> ');
+//
+// console.log(`Critical path: ${criticalPathStr}, critical time = ${result.maxTime}`);
 
