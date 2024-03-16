@@ -1,6 +1,10 @@
+:root{
+  background-color: #1e2026ff;
+}
+
 .App {
   text-align: center;
-  background-color: #282c34;
+  background-color: #1e2026ff;
   height: 100vh;
 }
 

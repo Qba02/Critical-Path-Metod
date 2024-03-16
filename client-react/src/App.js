@@ -1,6 +1,7 @@
 import logo from './css/logo2.svg';
 import './css/App.css';
 import EditableTable from "./components/EditableTable";
+import {GraphMaker} from "./components/GraphMaker";
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
           <img src={logo} className="App-logo" alt="logo" />
       </header>
         <EditableTable/>
+        <GraphMaker/>
     </div>
   );
 }

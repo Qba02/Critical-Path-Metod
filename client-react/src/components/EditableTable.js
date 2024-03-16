@@ -213,7 +213,7 @@ export default function EditableTable() {
             <Box className={"table-box"}
                 sx={{
                     height: 500,
-                    width: '100%',
+                    width: '90%',
                     '& .actions': {
                         color: '#61dafb',
                     },
