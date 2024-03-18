@@ -23,7 +23,7 @@ function GenerateNodes(data){
             {
                 id: item.source.toString(),
                 label: "id: " + item.source.toString(),
-                subLabel: item.ES + " - " + item.slack + " - " + item.LS,
+                subLabel: item.ES + " - " + item.slack + " - " + item.EF,
                 fill: (item.slack === 0 ? '#530262' : "grey")
             }));
 
@@ -34,7 +34,7 @@ function GenerateNodes(data){
         {
             id: maxElement.target.toString(),
             label: "id: " +maxElement.target.toString(),
-            subLabel: maxElement.EF + " - " + maxElement.slack + " - " + maxElement.LF,
+            subLabel: maxElement.ES + " - " + maxElement.slack + " - " + maxElement.EF,
             fill: '#530262'
         }
         );
