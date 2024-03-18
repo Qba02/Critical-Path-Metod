@@ -1,6 +1,6 @@
 import logo from './css/logo2.svg';
 import './css/App.css';
-import EditableTable from "./components/EditableTable";
+import MainComponent from "./components/MainComponent";
 
 function App() {
   return (
@@ -9,7 +9,7 @@ function App() {
           <div className={"header-title"}><h1>Metoda Ścieżki Krytycznej (CPM)</h1></div>
           <img src={logo} className="App-logo" alt="logo" />
       </header>
-        <EditableTable/>
+        <MainComponent/>
     </div>
   );
 }

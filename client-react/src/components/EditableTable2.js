@@ -24,16 +24,16 @@ import PropTypes from 'prop-types';
 import clsx from "clsx";
 import {styled} from "@mui/material";
 import {calculateCPM, findCriticalPath} from "../CPM/cpmMethod";
-import {GraphMaker} from "./GraphMaker";
+import {GraphMaker2} from "./GraphMaker2";
 
 
-const initialRows = [{id: 'first', activity: '', prevActivity: '', time:0}]
+const initialRows = [{id: 'first', activity: '', source:'', target: '' ,time:0}]
 function EditToolbar(props) {
     const { setRows, setRowModesModel } = props;
 
     const handleClick = () => {
         const id = randomId();
-        setRows((oldRows) => [...oldRows, { id, activity: '', prevActivity: '', time:0, isNew: true }]);
+        setRows((oldRows) => [...oldRows, { id, activity: '', source:'', target: '', time:0, isNew: true }]);
         setRowModesModel((oldModel) => ({
             ...oldModel,
             [id]: { mode: GridRowModes.Edit, fieldToFocus: 'name' },
@@ -49,7 +49,7 @@ function EditToolbar(props) {
     );
 }
 
-export default function EditableTable() {
+export default function EditableTable2() {
     const [rows, setRows] = React.useState(initialRows);
     const [rowModesModel, setRowModesModel] = React.useState({});
     const [cpmActivities, setCpmActivities] = React.useState([]);
@@ -94,7 +94,7 @@ export default function EditableTable() {
     };
 
     const handleSaveClick = (id) => () => {
-            setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
+        setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
     };
 
     const handleDeleteClick = (id) => () => {
@@ -130,17 +130,30 @@ export default function EditableTable() {
                 return;
             }else{
                 // Main CPM part
+                const minEl = rows.reduce((min, current)=>{
+                    return min.source < current.source ? min : current;
+                });
                 const reducedRows = rows.map(item=> {
                     const newItem = { ...item};
-                    delete newItem.id;
+                    if(newItem.source === minEl.source){
+                        newItem.prevActivity='';
+                    }else{
+                        let prevAct='';
+                        rows.map(i => {
+                            if(i.target === newItem.source){
+                                prevAct+=i.activity + ",";
+                            }
+                        });
+                        prevAct = prevAct.slice(0, -1);
+                        newItem.prevActivity = prevAct;
+                    }
                     return newItem;
                 });
+                console.log(reducedRows);
                 setCpmActivities(calculateCPM(reducedRows));
                 cpmActivities.forEach(activity => {
                     console.log(`Activity: ${activity.activity}, time: ${activity.time}, [ES,EF] = [${activity.ES},${activity.EF}], [LS,LF] = [${activity.LS},${activity.LF}], slack: ${activity.slack}`);
                 })
-
-
                 // Critical path
                 // let result = findCriticalPath(cpmActivities);
                 // let criticalPathStr = result.criticalPath.map(activity => activity.activity).join(' -> ');
@@ -154,15 +167,23 @@ export default function EditableTable() {
         {
             field: 'activity',
             headerName: 'Czynność',
-            width: 180,
+            width: 160,
             editable: true,
             cellClassName: 'column',
             headerClassName: 'header'
         },
         {
-            field: 'prevActivity',
-            headerName: 'Czynność poprzedzająca',
-            width: 240,
+            field: 'source',
+            headerName: 'Od',
+            width: 160,
+            editable: true,
+            cellClassName: 'column',
+            headerClassName: 'header'
+        },
+        {
+            field: 'target',
+            headerName: 'Do',
+            width: 160,
             editable: true,
             cellClassName: 'column',
             headerClassName: 'header'
@@ -171,7 +192,7 @@ export default function EditableTable() {
             field: 'time',
             headerName: 'Czas',
             type: 'number',
-            width: 180,
+            width: 160,
             align: 'left',
             headerAlign: 'left',
             editable: true,
@@ -230,16 +251,16 @@ export default function EditableTable() {
     return (
         <>
             <Box className={"table-box"}
-                sx={{
-                    height: 500,
-                    width: '100%',
-                    '& .actions': {
-                        color: '#61dafb',
-                    },
-                    '& .textPrimary': {
-                        color: '#61dafb',
-                    },
-                }}
+                 sx={{
+                     height: 500,
+                     width: '100%',
+                     '& .actions': {
+                         color: '#61dafb',
+                     },
+                     '& .textPrimary': {
+                         color: '#61dafb',
+                     },
+                 }}
             >
 
                 <DataGrid
@@ -282,10 +303,10 @@ export default function EditableTable() {
                             Wypełnij wszystkie pola tabeli!
                         </p>
                     </div>
-            </Modal>
+                </Modal>
             </Box>
             <div id={"graph"}>
-            <GraphMaker dataTab={cpmActivities}/>
+                <GraphMaker2 dataTab={cpmActivities}/>
             </div>
         </>
     );

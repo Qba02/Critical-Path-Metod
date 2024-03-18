@@ -4,7 +4,6 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 75vw;
     margin: 16px;
 }
 .header, .column, .grid-toolbar, .data-grid{
@@ -33,11 +32,10 @@
 }
 
 .alert-div p {
-    margin: 0;
     line-height: 1.5rem;
     font-weight: 400;
     color: #666;
-    margin-bottom: 4px;
+    margin: 0 0 4px;
 }
 
 .modal{
